@@ -1,0 +1,8 @@
+<resources>
+    <string name="connect_to_host">Connect to host</string>
+    <string name="host_address">Host address</string>
+    <string name="app_name">Flex OSC</string>
+    <string name="host_port">Host listening port</string>
+    <string name="default_port">8139</string>
+    <string name="connect">Connect</string>
+</resources>
