@@ -12,11 +12,10 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.android.synthetic.main.activity_dummy_surface.*
-import kotlinx.android.synthetic.main.fragment_connection_dialog.*
 
 const val CONNECTION_DIALOG_TAG = "connection_dialog"
 
-class DummySurface : AppCompatActivity() {
+class DummySurfaceActivity : AppCompatActivity() {
 
     private val viewModel: DummySurfaceModel by lazy {
         ViewModelProvider(this).get(DummySurfaceModel::class.java)
@@ -73,9 +72,6 @@ class DummySurface : AppCompatActivity() {
 
 class ConnectionParamsDialog(private val viewModel: DummySurfaceModel) :
     DialogFragment() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dlg = super.onCreateDialog(savedInstanceState)
