@@ -12,6 +12,9 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.android.synthetic.main.activity_dummy_surface.*
+import org.rtbo.flexosc.model.ConnectionParams
+import org.rtbo.flexosc.model.OscMessage
+import org.rtbo.flexosc.model.UdpOscConnection
 
 const val CONNECTION_DIALOG_TAG = "connection_dialog"
 
@@ -102,7 +105,8 @@ class ConnectionParamsDialog(private val viewModel: DummySurfaceModel) :
                 sendPort.text.toString().toInt(),
                 rcvPort.text.toString().toInt()
             )
-            viewModel.connection.value = UdpOscConnection(newParams)
+            viewModel.connection.value =
+                UdpOscConnection(newParams)
             dismiss()
         }
 

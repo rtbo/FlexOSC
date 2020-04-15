@@ -1,4 +1,4 @@
-package org.rtbo.flexosc
+package org.rtbo.flexosc.model
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers
@@ -6,7 +6,6 @@ import kotlinx.coroutines.withContext
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
-import java.net.InetSocketAddress
 
 data class ConnectionParams(val address: String, val sendPort: Int, val rcvPort: Int) {
     override fun toString(): String {
@@ -16,10 +15,12 @@ data class ConnectionParams(val address: String, val sendPort: Int, val rcvPort:
 
 abstract class OscConnection(val params: ConnectionParams) {
     abstract suspend fun sendMessage(msg: OscMessage)
+    abstract suspend fun receiveMessage(): OscMessage
 }
 
-class UdpOscConnection(params: ConnectionParams) : OscConnection(params) {
+const val MAX_MSG_SIZE = 16 * 1024
 
+class UdpOscConnection(params: ConnectionParams) : OscConnection(params) {
     private val sendSocket: DatagramSocket by lazy {
         DatagramSocket()
     }
@@ -28,12 +29,21 @@ class UdpOscConnection(params: ConnectionParams) : OscConnection(params) {
         InetAddress.getByName(params.address)
     }
 
+    private val rcvBuf = ByteArray(MAX_MSG_SIZE)
+
     override suspend fun sendMessage(msg: OscMessage) {
         val arr = msg.payload
 
         withContext(Dispatchers.IO) {
-            Log.d("OSC_MSG", "sending message ${msg.address} on ${hostAddress.toString()}:$params.sendPort")
+            Log.d(
+                "OSC_MSG",
+                "sending message ${msg.address} on $hostAddress:$params.sendPort"
+            )
             sendSocket.send(DatagramPacket(arr, arr.size, hostAddress, params.sendPort))
         }
+    }
+
+    override suspend fun receiveMessage(): OscMessage {
+        return OscMessage("")
     }
 }

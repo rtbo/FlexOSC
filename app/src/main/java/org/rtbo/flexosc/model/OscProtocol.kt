@@ -1,4 +1,4 @@
-package org.rtbo.flexosc
+package org.rtbo.flexosc.model
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
