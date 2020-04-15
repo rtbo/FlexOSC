@@ -65,7 +65,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/recToggleBtn"
         />
-    <com.google.android.material.button.MaterialButton
+    <Button
         android:id="@+id/connectionBtn"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -76,9 +76,6 @@
         android:layout_marginBottom="32dp"
         android:text="@string/no_host_connection"
         app:backgroundTint="@color/colorPrimary"
-        app:icon="@drawable/square_led_32"
-        app:iconTint="#FF1616"
-        app:iconTintMode="multiply"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

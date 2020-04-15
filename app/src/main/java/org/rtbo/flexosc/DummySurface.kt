@@ -1,25 +1,22 @@
 package org.rtbo.flexosc
 
-import android.app.job.JobServiceEngine
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.google.android.material.textfield.TextInputLayout
 import kotlinx.android.synthetic.main.activity_dummy_surface.*
+import kotlinx.android.synthetic.main.fragment_connection_dialog.*
 
 const val CONNECTION_DIALOG_TAG = "connection_dialog"
 
 class DummySurface : AppCompatActivity() {
 
     private val viewModel = ViewModelProvider(this).get(DummySurfaceModel::class.java)
-    private val connectionDlg = ConnectionDialogFragment(viewModel)
+    private val connectionDlg = ConnectionParamsDialog(viewModel)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,9 +24,6 @@ class DummySurface : AppCompatActivity() {
 
         viewModel.connection.observe(this, Observer {
             connectionBtn.text = it?.params.toString()
-            connectionBtn.setIconTintResource(
-                if (it == null) R.color.ledRed else R.color.ledGreen
-            )
         })
 
         transportStartBtn.setOnClickListener {
@@ -68,7 +62,7 @@ class DummySurface : AppCompatActivity() {
     }
 }
 
-class ConnectionDialogFragment(private val viewModel: DummySurfaceModel) :
+class ConnectionParamsDialog(private val viewModel: DummySurfaceModel) :
     DialogFragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,18 +74,19 @@ class ConnectionDialogFragment(private val viewModel: DummySurfaceModel) :
         savedInstanceState: Bundle?
     ): View? {
         val v = inflater.inflate(R.layout.fragment_connection_dialog, container, false)
-        val btn = v.findViewById<Button>(R.id.connectBtn)
-        val hostAddress = v.findViewById<TextInputLayout>(R.id.hostAddress)
-        val sendPort = v.findViewById<TextInputLayout>(R.id.sendPort)
-        val rcvPort = v.findViewById<TextInputLayout>(R.id.rcvPort)
 
-        btn.setOnClickListener {
-            val params = ConnectionParams(
-                hostAddress.editText?.text.toString(),
-                sendPort.editText?.text.toString().toInt(),
-                rcvPort.editText?.text.toString().toInt()
+        val params = viewModel.connection.value!!.params
+        hostAddress.setText(params.address)
+        sendPort.setText(params.sendPort.toString())
+        rcvPort.setText(params.rcvPort.toString())
+
+        doneBtn.setOnClickListener {
+            val newParams = ConnectionParams(
+                hostAddress.text.toString(),
+                sendPort.text.toString().toInt(),
+                rcvPort.text.toString().toInt()
             )
-            viewModel.connection.value = UdpOscConnection (params)
+            viewModel.connection.value = UdpOscConnection(newParams)
             dismiss()
         }
 

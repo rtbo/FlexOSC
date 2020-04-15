@@ -4,7 +4,7 @@
     <string name="app_name">Flex OSC</string>
     <string name="default_send_port">3819</string>
     <string name="default_rcv_port">8000</string>
-    <string name="connect">Connect</string>
+    <string name="done">Done</string>
     <string name="stop_transport">Stop Transport</string>
     <string name="start_transport">Start transport</string>
     <string name="rec_on_off">Rec ON/OFF</string>
