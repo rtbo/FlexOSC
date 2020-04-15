@@ -14,11 +14,11 @@
         android:layout_height="match_parent"
         android:layout_centerVertical="true"
         android:orientation="vertical"
+        android:padding="@dimen/padding_dialog"
         tools:context=".MainActivity"
         >
 
         <TextView
-            android:id="@+id/textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/connect_to_host"
@@ -35,15 +35,16 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="@string/default_host_address"
                 />
 
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/hostPort"
+            android:id="@+id/sendPort"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/host_port"
+            android:hint="@string/sending_port"
             app:endIconMode="clear_text"
             app:errorEnabled="true"
             >
@@ -51,7 +52,23 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/default_port"
+                android:text="@string/default_send_port"
+                />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/rcvPort"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/receiving_port"
+            app:endIconMode="clear_text"
+            app:errorEnabled="true"
+            >
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/default_rcv_port"
                 />
         </com.google.android.material.textfield.TextInputLayout>
 
