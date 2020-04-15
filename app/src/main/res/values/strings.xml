@@ -2,7 +2,15 @@
     <string name="connect_to_host">Connect to host</string>
     <string name="host_address">Host address</string>
     <string name="app_name">Flex OSC</string>
-    <string name="host_port">Host listening port</string>
-    <string name="default_port">8139</string>
+    <string name="default_send_port">3819</string>
+    <string name="default_rcv_port">8000</string>
     <string name="connect">Connect</string>
+    <string name="stop_transport">Stop Transport</string>
+    <string name="start_transport">Start transport</string>
+    <string name="rec_on_off">Rec ON/OFF</string>
+    <string name="stop_forget"><![CDATA[Stop & Forget]]></string>
+    <string name="no_host_connection">(no host connection)</string>
+    <string name="default_host_address">192.168.1.1</string>
+    <string name="receiving_port">Receiving port</string>
+    <string name="sending_port">Sending port</string>
 </resources>
