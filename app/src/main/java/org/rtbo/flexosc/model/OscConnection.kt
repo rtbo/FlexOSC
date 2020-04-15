@@ -32,7 +32,7 @@ class UdpOscConnection(params: ConnectionParams) : OscConnection(params) {
     private val rcvBuf = ByteArray(MAX_MSG_SIZE)
 
     override suspend fun sendMessage(msg: OscMessage) {
-        val arr = msg.payload
+        val arr = oscMessageToPacket(msg)
 
         withContext(Dispatchers.IO) {
             Log.d(

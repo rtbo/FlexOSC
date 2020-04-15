@@ -3,45 +3,81 @@ package org.rtbo.flexosc.model
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-private fun oscStringLen(value: String) = value.length + 1 + (value.length + 1) % 4
-private fun oscBlobLen(value: ByteArray): Int {
-    if ((value.size % 4) != 0) {
-        throw Exception("Blob is not 4 bytes aligned!")
-    }
-    return value.size
+sealed class OscAtomic {
+    abstract val tagLen: Pair<Char, Int>
+    abstract fun bufferUp(buffer: ByteBuffer)
 }
 
-private fun oscStringPayload(value: String): ByteArray {
-    for (c in value) {
-        if (c.toInt() > 127) {
-            throw Exception("\"${value}\" is not ASCII!")
+data class OscString(val value: String) : OscAtomic() {
+    init {
+        for (c in value) {
+            if (c.toInt() > 127) {
+                throw Exception("\"${value}\" is not ASCII!")
+            }
         }
     }
-    val numNulls = 1 + (value.length + 1) % 4
-    return value.toByteArray(Charsets.US_ASCII) + ByteArray(numNulls)
-}
 
-private fun oscAtomicTagLen(arg: Any): Pair<Char, Int> {
-    return when (arg) {
-        is Int -> Pair('i', 4)
-        is Float -> Pair('f', 4)
-        is String -> Pair('s', oscStringLen(arg))
-        is ByteArray -> Pair('b', oscBlobLen(arg))
-        else -> throw Exception("Unsupported atomic type: ${arg.javaClass.name}")
+    override val tagLen = Pair('s', value.length + 1 + (value.length + 1) % 4)
+    override fun bufferUp(buffer: ByteBuffer) {
+        var numNulls = 1 + (value.length + 1) % 4
+        buffer.put(value.toByteArray(Charsets.US_ASCII))
+        while ((numNulls--) > 0) {
+            buffer.put(0.toByte())
+        }
     }
 }
 
-private fun bufferOscAtomic(arg: Any, buffer: ByteBuffer) {
-    when (arg) {
-        is Int -> buffer.putInt(arg)
-        is Float -> buffer.putFloat(arg)
-        is String -> buffer.put(oscStringPayload(arg))
-        is ByteArray -> buffer.put(arg)
-        else -> throw Exception("Unsupported atomic type: ${arg.javaClass.name}")
+data class OscInt(val value: Int) : OscAtomic() {
+    override val tagLen = Pair('i', 4)
+    override fun bufferUp(buffer: ByteBuffer) {
+        buffer.putInt(value)
     }
 }
 
-data class OscMessage(val address: String, val args: Array<Any> = emptyArray()) {
+data class OscFloat(val value: Float) : OscAtomic() {
+    override val tagLen = Pair('f', 4)
+    override fun bufferUp(buffer: ByteBuffer) {
+        buffer.putFloat(value)
+    }
+}
+
+data class OscBlob(val value: ByteArray) : OscAtomic() {
+    init {
+        if ((value.size % 4) != 0) {
+            throw Exception("Blob is not 4 bytes aligned!")
+        }
+    }
+
+    override val tagLen = Pair('b', value.size)
+
+    override fun bufferUp(buffer: ByteBuffer) {
+        buffer.put(value)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as OscBlob
+
+        if (!value.contentEquals(other.value)) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return value.contentHashCode()
+    }
+}
+
+
+data class OscMessage(val address: OscString, val args: Array<OscAtomic> = emptyArray()) {
+
+    constructor(address: String, args: Array<OscAtomic> = emptyArray()) : this(
+        OscString(address),
+        args
+    )
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -59,27 +95,24 @@ data class OscMessage(val address: String, val args: Array<Any> = emptyArray()) 
         result = 31 * result + args.contentHashCode()
         return result
     }
+}
 
-    val payload: ByteArray
-        get() {
-            var msgSz = oscStringLen(address)
-            var argsTypeTags = ","
-            for (arg in args) {
-                val (tag, len) = oscAtomicTagLen(arg)
-                argsTypeTags += tag
-                msgSz += len
-            }
-            msgSz += oscStringLen(argsTypeTags)
+fun oscMessageToPacket(msg: OscMessage): ByteArray {
+    var (_, msgSz) = msg.address.tagLen
+    var argsTypeTags = ","
+    for (arg in msg.args) {
+        val (tag, len) = arg.tagLen
+        argsTypeTags += tag
+        msgSz += len
+    }
+    val attAtomic = OscString(argsTypeTags)
+    msgSz += attAtomic.tagLen.second
 
-            val buffer = ByteBuffer.allocate(msgSz)
-            buffer.order(ByteOrder.BIG_ENDIAN)
-            bufferOscAtomic(address, buffer)
-            bufferOscAtomic(argsTypeTags, buffer)
-            for (arg in args) {
-                bufferOscAtomic(arg, buffer)
-            }
+    val buffer = ByteBuffer.allocate(msgSz)
+    buffer.order(ByteOrder.BIG_ENDIAN)
+    msg.address.bufferUp(buffer)
+    attAtomic.bufferUp(buffer)
+    msg.args.forEach { it.bufferUp(buffer) }
 
-            return buffer.array()
-        }
-
+    return buffer.array()
 }
