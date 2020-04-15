@@ -3,7 +3,7 @@ package org.rtbo.flexosc
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-private fun oscStringLen(value: String) = value.length + value.length % 4
+private fun oscStringLen(value: String) = value.length + 1 + (value.length + 1) % 4
 private fun oscBlobLen(value: ByteArray): Int {
     if ((value.size % 4) != 0) {
         throw Exception("Blob is not 4 bytes aligned!")
@@ -17,7 +17,8 @@ private fun oscStringPayload(value: String): ByteArray {
             throw Exception("\"${value}\" is not ASCII!")
         }
     }
-    return value.toByteArray(Charsets.US_ASCII) + ByteArray(value.length % 4)
+    val numNulls = 1 + (value.length + 1) % 4
+    return value.toByteArray(Charsets.US_ASCII) + ByteArray(numNulls)
 }
 
 private fun oscAtomicTagLen(arg: Any): Pair<Char, Int> {
@@ -40,7 +41,7 @@ private fun bufferOscAtomic(arg: Any, buffer: ByteBuffer) {
     }
 }
 
-data class OscMessage(val address: String, val args: Array<Any>) {
+data class OscMessage(val address: String, val args: Array<Any> = emptyArray()) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -59,7 +60,7 @@ data class OscMessage(val address: String, val args: Array<Any>) {
         return result
     }
 
-    val payload: ByteBuffer
+    val payload: ByteArray
         get() {
             var msgSz = oscStringLen(address)
             var argsTypeTags = ","
@@ -73,11 +74,12 @@ data class OscMessage(val address: String, val args: Array<Any>) {
             val buffer = ByteBuffer.allocate(msgSz)
             buffer.order(ByteOrder.BIG_ENDIAN)
             bufferOscAtomic(address, buffer)
+            bufferOscAtomic(argsTypeTags, buffer)
             for (arg in args) {
                 bufferOscAtomic(arg, buffer)
             }
 
-            return buffer.asReadOnlyBuffer()
+            return buffer.array()
         }
 
 }
