@@ -1,5 +1,5 @@
 <resources>
-    <string name="connect_to_host">Connect to host</string>
+    <string name="connection_params">Connection parameters</string>
     <string name="host_address">Host address</string>
     <string name="app_name">Flex OSC</string>
     <string name="default_send_port">3819</string>

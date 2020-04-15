@@ -1,9 +1,12 @@
 package org.rtbo.flexosc
 
+import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
@@ -15,8 +18,14 @@ const val CONNECTION_DIALOG_TAG = "connection_dialog"
 
 class DummySurface : AppCompatActivity() {
 
-    private val viewModel = ViewModelProvider(this).get(DummySurfaceModel::class.java)
-    private val connectionDlg = ConnectionParamsDialog(viewModel)
+    private val viewModel: DummySurfaceModel by lazy {
+        ViewModelProvider(this).get(DummySurfaceModel::class.java)
+    }
+    private val connectionDlg: ConnectionParamsDialog by lazy {
+        val fragment = ConnectionParamsDialog(viewModel)
+        fragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.TitleDialog)
+        fragment
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,12 +77,23 @@ class ConnectionParamsDialog(private val viewModel: DummySurfaceModel) :
         super.onCreate(savedInstanceState)
     }
 
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val dlg = super.onCreateDialog(savedInstanceState)
+        dlg.setTitle(R.string.connection_params)
+        return dlg
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val v = inflater.inflate(R.layout.fragment_connection_dialog, container, false)
+
+        val hostAddress = v.findViewById<EditText>(R.id.hostAddress)
+        val sendPort = v.findViewById<EditText>(R.id.sendPort)
+        val rcvPort = v.findViewById<EditText>(R.id.rcvPort)
+        val doneBtn = v.findViewById<Button>(R.id.doneBtn)
 
         val params = viewModel.connection.value!!.params
         hostAddress.setText(params.address)
