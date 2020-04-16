@@ -25,6 +25,12 @@ class UdpOscConnection(params: ConnectionParams) : OscConnection(params) {
         DatagramSocket()
     }
 
+    private val rcvSocket: DatagramSocket by lazy {
+        val sock = DatagramSocket(params.rcvPort)
+        sock.connect(InetAddress.getByName(params.address), params.rcvPort)
+        sock
+    }
+
     private val hostAddress: InetAddress by lazy {
         InetAddress.getByName(params.address)
     }
@@ -44,6 +50,10 @@ class UdpOscConnection(params: ConnectionParams) : OscConnection(params) {
     }
 
     override suspend fun receiveMessage(): OscMessage {
-        return OscMessage("")
+        return withContext(Dispatchers.IO) {
+            val pkt = DatagramPacket(rcvBuf, rcvBuf.size)
+            rcvSocket.receive(pkt)
+            oscPacketToMessage(rcvBuf.copyOf(pkt.length))
+        }
     }
 }
