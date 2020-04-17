@@ -7,20 +7,13 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 
-data class ConnectionParams(val address: String, val sendPort: Int, val rcvPort: Int) {
-    override fun toString(): String {
-        return "$address:\u2191$sendPort:\u2193$rcvPort"
-    }
-}
 
-abstract class OscConnection(val params: ConnectionParams) {
+sealed class ConnectionTransport(val params: ConnectionParams) {
     abstract suspend fun sendMessage(msg: OscMessage)
     abstract suspend fun receiveMessage(): OscMessage
 }
 
-const val MAX_MSG_SIZE = 16 * 1024
-
-class UdpOscConnection(params: ConnectionParams) : OscConnection(params) {
+class ConnectionTransportUDP(params: ConnectionParams) : ConnectionTransport(params) {
     private val sendSocket: DatagramSocket by lazy {
         DatagramSocket()
     }
@@ -57,3 +50,5 @@ class UdpOscConnection(params: ConnectionParams) : OscConnection(params) {
         }
     }
 }
+
+const val MAX_MSG_SIZE = 16 * 1024

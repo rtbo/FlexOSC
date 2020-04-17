@@ -13,8 +13,8 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.android.synthetic.main.activity_dummy_surface.*
 import org.rtbo.flexosc.model.ConnectionParams
+import org.rtbo.flexosc.model.ConnectionTransportUDP
 import org.rtbo.flexosc.model.OscMessage
-import org.rtbo.flexosc.model.UdpOscConnection
 
 const val CONNECTION_DIALOG_TAG = "connection_dialog"
 
@@ -23,8 +23,8 @@ class DummySurfaceActivity : AppCompatActivity() {
     private val viewModel: DummySurfaceModel by lazy {
         ViewModelProvider(this).get(DummySurfaceModel::class.java)
     }
-    private val connectionDlg: ConnectionParamsDialog by lazy {
-        val fragment = ConnectionParamsDialog(viewModel)
+    private val connectionDlg: DummyConnectionParamsDialog by lazy {
+        val fragment = DummyConnectionParamsDialog(viewModel)
         fragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.TitleDialog)
         fragment
     }
@@ -33,7 +33,7 @@ class DummySurfaceActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_dummy_surface)
 
-        viewModel.connection.observe(this, Observer {
+        viewModel.transport.observe(this, Observer {
             connectionBtn.text = it?.params.toString()
         })
 
@@ -73,7 +73,7 @@ class DummySurfaceActivity : AppCompatActivity() {
     }
 }
 
-class ConnectionParamsDialog(private val viewModel: DummySurfaceModel) :
+class DummyConnectionParamsDialog(private val viewModel: DummySurfaceModel) :
     DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -94,7 +94,7 @@ class ConnectionParamsDialog(private val viewModel: DummySurfaceModel) :
         val rcvPort = v.findViewById<EditText>(R.id.rcvPort)
         val doneBtn = v.findViewById<Button>(R.id.doneBtn)
 
-        val params = viewModel.connection.value!!.params
+        val params = viewModel.transport.value!!.params
         hostAddress.setText(params.address)
         sendPort.setText(params.sendPort.toString())
         rcvPort.setText(params.rcvPort.toString())
@@ -105,8 +105,8 @@ class ConnectionParamsDialog(private val viewModel: DummySurfaceModel) :
                 sendPort.text.toString().toInt(),
                 rcvPort.text.toString().toInt()
             )
-            viewModel.connection.value =
-                UdpOscConnection(newParams)
+            viewModel.transport.value =
+                ConnectionTransportUDP(newParams)
             dismiss()
         }
 

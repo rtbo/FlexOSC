@@ -94,6 +94,7 @@ data class OscBlob(val value: ByteArray) : OscAtomic() {
 
         return true
     }
+
     override fun hashCode(): Int {
         return value.contentHashCode()
     }
@@ -127,12 +128,23 @@ data class OscBlob(val value: ByteArray) : OscAtomic() {
     }
 }
 
+fun Int.toOsc() = OscInt(this)
+fun Float.toOsc() = OscFloat(this)
+fun String.toOsc() = OscString(this)
+fun ByteArray.toOsc() = OscBlob(this)
 
 data class OscMessage(val address: OscString, val args: Array<OscAtomic> = emptyArray()) {
 
     constructor(address: String, args: Array<OscAtomic> = emptyArray()) : this(
-        OscString(address),
-        args
+        address.toOsc(), args
+    )
+
+    constructor(address: OscString, arg: OscAtomic) : this(
+        address, arrayOf(arg)
+    )
+
+    constructor(address: String, arg: OscAtomic) : this(
+        address.toOsc(), arrayOf(arg)
     )
 
     override fun equals(other: Any?): Boolean {
