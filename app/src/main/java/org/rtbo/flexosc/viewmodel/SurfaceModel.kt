@@ -1,30 +1,24 @@
-package org.rtbo.flexosc.model
+package org.rtbo.flexosc.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import org.rtbo.flexosc.model.OscConnection
+import org.rtbo.flexosc.model.OscConnectionUDP
+import org.rtbo.flexosc.model.OscMessage
+import org.rtbo.flexosc.model.OscSocketParams
 
-data class ConnectionParams(
-    val address: String,
-    val sendPort: Int,
-    val rcvPort: Int
-) {
-    override fun toString(): String {
-        return "$address:\u2191$sendPort:\u2193$rcvPort"
-    }
-}
+class SurfaceModel : ViewModel() {
 
-class ConnectionModel : ViewModel() {
+    private var connection: OscConnection? = null
+    private val mutableParams = MutableLiveData<OscSocketParams>(null)
 
-    private var transport: ConnectionTransport? = null
-    private val mutableParams = MutableLiveData<ConnectionParams>(null)
-
-    val params: LiveData<ConnectionParams> = mutableParams
-    fun setParams(value: ConnectionParams) {
+    val params: LiveData<OscSocketParams> = mutableParams
+    fun setParams(value: OscSocketParams) {
         mutableParams.value = value
-        transport = ConnectionTransportUDP(value)
+        connection = OscConnectionUDP(value)
         if (receiveMessage.hasActiveObservers() && !listening) {
             startListening()
         }
@@ -47,14 +41,14 @@ class ConnectionModel : ViewModel() {
 
     fun sendMessage(msg: OscMessage) {
         viewModelScope.launch {
-            transport?.sendMessage(msg)
+            connection?.sendMessage(msg)
         }
     }
 
     val receiveMessage = object : MutableLiveData<OscMessage>() {
         override fun onActive() {
             super.onActive()
-            if (transport != null) {
+            if (connection != null) {
                 startListening()
             }
         }
@@ -79,8 +73,8 @@ class ConnectionModel : ViewModel() {
     }
 
     private suspend fun listenLoop() {
-        while (transport != null && listening) {
-            transport?.receiveMessage()?.let {
+        while (connection != null && listening) {
+            connection?.receiveMessage()?.let {
                 receiveMessage.postValue(it)
             }
         }

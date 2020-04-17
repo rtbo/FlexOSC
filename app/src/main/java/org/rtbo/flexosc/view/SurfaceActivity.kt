@@ -1,4 +1,4 @@
-package org.rtbo.flexosc
+package org.rtbo.flexosc.view
 
 import android.app.Dialog
 import android.os.Bundle
@@ -10,23 +10,25 @@ import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
-import org.rtbo.flexosc.model.ConnectionModel
-import org.rtbo.flexosc.model.ConnectionParams
+import org.rtbo.flexosc.R
+import org.rtbo.flexosc.model.OscSocketParams
+import org.rtbo.flexosc.viewmodel.SurfaceModel
 
 class SurfaceActivity : AppCompatActivity() {
-
-    private val model: ConnectionModel by lazy {
-        ViewModelProvider(this).get(ConnectionModel::class.java)
+    private val model: SurfaceModel by lazy {
+        ViewModelProvider(this).get(SurfaceModel::class.java)
     }
     private val connectionDlg: ConnectionParamsDialog by lazy {
         val fragment = ConnectionParamsDialog(model)
-        fragment.setStyle(DialogFragment.STYLE_NORMAL, R.style.TitleDialog)
+        fragment.setStyle(
+            DialogFragment.STYLE_NORMAL,
+            R.style.TitleDialog
+        )
         fragment
     }
-
 }
 
-class ConnectionParamsDialog(private val model: ConnectionModel) : DialogFragment() {
+class ConnectionParamsDialog(private val model: SurfaceModel) : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dlg = super.onCreateDialog(savedInstanceState)
@@ -55,7 +57,7 @@ class ConnectionParamsDialog(private val model: ConnectionModel) : DialogFragmen
 
         doneBtn.setOnClickListener {
             model.setParams(
-                ConnectionParams(
+                OscSocketParams(
                     hostAddress.text.toString(),
                     sendPort.text.toString().toInt(),
                     rcvPort.text.toString().toInt()

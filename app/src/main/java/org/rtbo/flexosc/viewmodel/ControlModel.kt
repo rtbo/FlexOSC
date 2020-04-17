@@ -1,18 +1,20 @@
-package org.rtbo.flexosc.model
+package org.rtbo.flexosc.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
+import org.rtbo.flexosc.model.OscInt
+import org.rtbo.flexosc.model.OscMessage
 
 // dimension units are in grid units
 data class Position(val x: Int, val y: Int)
 data class Size(val width: Int, val height: Int)
 
-sealed class ControlModel(val model: ConnectionModel) {
+sealed class ControlModel(val model: SurfaceModel) {
     var position = Position(0, 0)
     abstract val size: Size
 }
 
-abstract class ReceivingModel(model: ConnectionModel) : ControlModel(model) {
+abstract class ReceivingModel(model: SurfaceModel) : ControlModel(model) {
     var rcvAddress: String
         get() {
             return _rcvMsg.address
@@ -26,14 +28,14 @@ abstract class ReceivingModel(model: ConnectionModel) : ControlModel(model) {
     val receiveMessage: LiveData<OscMessage> = _rcvMsg
 }
 
-class ButtonModel(model: ConnectionModel) : ControlModel(model) {
+class ButtonModel(model: SurfaceModel) : ControlModel(model) {
     var sendAddress: String = ""
     override val size = Size(1, 1)
 
     fun click() = model.sendMessage(OscMessage(sendAddress))
 }
 
-class ToggleButtonModel(model: ConnectionModel) : ReceivingModel(model) {
+class ToggleButtonModel(model: SurfaceModel) : ReceivingModel(model) {
     var sendAddress: String = ""
 
     private var _state = MsgMapLiveData<Boolean>(receiveMessage, mapSingleBool(true))
@@ -41,7 +43,12 @@ class ToggleButtonModel(model: ConnectionModel) : ReceivingModel(model) {
     val state: LiveData<Boolean> = this._state
 
     fun setState(value: Boolean) {
-        model.sendMessage(OscMessage(sendAddress, OscInt(if (value) 1 else 0)))
+        model.sendMessage(
+            OscMessage(
+                sendAddress,
+                OscInt(if (value) 1 else 0)
+            )
+        )
         _state.value = value
     }
 

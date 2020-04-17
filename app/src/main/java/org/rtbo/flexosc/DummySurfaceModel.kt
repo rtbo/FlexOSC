@@ -4,17 +4,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import org.rtbo.flexosc.model.ConnectionParams
-import org.rtbo.flexosc.model.ConnectionTransport
-import org.rtbo.flexosc.model.ConnectionTransportUDP
+import org.rtbo.flexosc.model.OscConnection
+import org.rtbo.flexosc.model.OscConnectionUDP
 import org.rtbo.flexosc.model.OscMessage
+import org.rtbo.flexosc.model.OscSocketParams
 
 class DummySurfaceModel : ViewModel() {
 
-    val transport: MutableLiveData<ConnectionTransport> by lazy {
-        MutableLiveData<ConnectionTransport>(
-            ConnectionTransportUDP(
-                ConnectionParams(
+    val connection: MutableLiveData<OscConnection> by lazy {
+        MutableLiveData<OscConnection>(
+            OscConnectionUDP(
+                OscSocketParams(
                     "192.168.1.23", 3819, 8000
                 )
             )
@@ -23,7 +23,7 @@ class DummySurfaceModel : ViewModel() {
 
     fun sendMessage(msg: OscMessage) {
         viewModelScope.launch {
-            transport.value?.sendMessage(msg)
+            connection.value?.sendMessage(msg)
         }
     }
 

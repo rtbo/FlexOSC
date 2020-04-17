@@ -7,13 +7,22 @@ import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
 
+data class OscSocketParams(
+    val address: String,
+    val sendPort: Int,
+    val rcvPort: Int
+) {
+    override fun toString(): String {
+        return "$address:\u2191$sendPort:\u2193$rcvPort"
+    }
+}
 
-sealed class ConnectionTransport(val params: ConnectionParams) {
+sealed class OscConnection(val params: OscSocketParams) {
     abstract suspend fun sendMessage(msg: OscMessage)
     abstract suspend fun receiveMessage(): OscMessage
 }
 
-class ConnectionTransportUDP(params: ConnectionParams) : ConnectionTransport(params) {
+class OscConnectionUDP(params: OscSocketParams) : OscConnection(params) {
     private val sendSocket: DatagramSocket by lazy {
         DatagramSocket()
     }
@@ -28,8 +37,6 @@ class ConnectionTransportUDP(params: ConnectionParams) : ConnectionTransport(par
         InetAddress.getByName(params.address)
     }
 
-    private val rcvBuf = ByteArray(MAX_MSG_SIZE)
-
     override suspend fun sendMessage(msg: OscMessage) {
         val arr = oscMessageToPacket(msg)
 
@@ -41,6 +48,8 @@ class ConnectionTransportUDP(params: ConnectionParams) : ConnectionTransport(par
             sendSocket.send(DatagramPacket(arr, arr.size, hostAddress, params.sendPort))
         }
     }
+
+    private val rcvBuf = ByteArray(MAX_MSG_SIZE)
 
     override suspend fun receiveMessage(): OscMessage {
         return withContext(Dispatchers.IO) {

@@ -43,7 +43,10 @@ data class OscString(val value: String) : OscAtomic() {
         }
     }
 
-    override val tagLen = Pair('s', alignUp(value.length + 1))
+    override val tagLen = Pair(
+        's',
+        alignUp(value.length + 1)
+    )
     override fun encode(buffer: ByteBuffer) {
         var numNulls = alignUp(value.length + 1) - value.length
         buffer.put(value.toByteArray(Charsets.US_ASCII))
@@ -195,7 +198,10 @@ fun oscPacketToMessage(pkt: ByteArray): OscMessage {
         throw Exception("Ill-formed Message for $address: missing ',' in arguments type tags")
     }
     val args = Array<OscAtomic>(typeTags.value.length - 1) {
-        OscAtomic.decode(typeTags.value[it + 1], buffer)
+        OscAtomic.decode(
+            typeTags.value[it + 1],
+            buffer
+        )
     }
     return OscMessage(address, args)
 }
