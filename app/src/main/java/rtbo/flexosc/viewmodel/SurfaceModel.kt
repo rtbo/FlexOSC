@@ -59,7 +59,13 @@ class SurfaceModel : ViewModel() {
 
     fun sendMessage(msg: OscMessage) {
         viewModelScope.launch {
-            connection?.sendMessage(msg)
+            connection?.let{
+                Log.d(
+                    "OSC_MSG",
+                    "Sending $msg"
+                )
+                it.sendMessage(msg)
+            }
         }
     }
 
@@ -94,7 +100,7 @@ class SurfaceModel : ViewModel() {
         Log.d("FlexOSX", "Entering listening loop on ${params.value.toString()}")
         while (connection != null && listening) {
             connection?.receiveMessage()?.let {
-                Log.d("FlexOSC", "Received message for ${it.address.value}")
+                Log.d("OSC_MSG", "Received $it")
                 receiveMessage.postValue(it)
             }
         }

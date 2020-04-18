@@ -1,6 +1,5 @@
 package rtbo.flexosc.model
 
-import android.util.Log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.DatagramPacket
@@ -51,10 +50,6 @@ class OscConnectionUDP(params: OscSocketParams) : OscConnection(params) {
         val arr = oscMessageToPacket(msg)
 
         withContext(Dispatchers.IO) {
-            Log.d(
-                "OSC_MSG",
-                "sending message ${msg.address} on $hostAddress:$params.sendPort"
-            )
             sendSocket.send(DatagramPacket(arr, arr.size, hostAddress, params.sendPort))
         }
     }
