@@ -1,4 +1,4 @@
-package org.rtbo.flexosc.viewmodel
+package rtbo.flexosc.viewmodel
 
 import android.util.Log
 import androidx.lifecycle.LiveData
@@ -6,10 +6,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import org.rtbo.flexosc.model.OscConnection
-import org.rtbo.flexosc.model.OscConnectionUDP
-import org.rtbo.flexosc.model.OscMessage
-import org.rtbo.flexosc.model.OscSocketParams
+import rtbo.flexosc.model.OscConnection
+import rtbo.flexosc.model.OscConnectionUDP
+import rtbo.flexosc.model.OscMessage
+import rtbo.flexosc.model.OscSocketParams
 
 // dimension units are in grid units
 data class Position(val x: Int, val y: Int)

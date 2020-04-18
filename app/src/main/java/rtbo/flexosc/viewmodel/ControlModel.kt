@@ -1,9 +1,9 @@
-package org.rtbo.flexosc.viewmodel
+package rtbo.flexosc.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
-import org.rtbo.flexosc.model.OscInt
-import org.rtbo.flexosc.model.OscMessage
+import rtbo.flexosc.model.OscInt
+import rtbo.flexosc.model.OscMessage
 
 sealed class ControlModel(val model: SurfaceModel) {
     var position = Position(0, 0)

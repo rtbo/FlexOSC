@@ -1,13 +1,13 @@
-package org.rtbo.flexosc
+package rtbo.flexosc
 
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import org.rtbo.flexosc.model.OscConnection
-import org.rtbo.flexosc.model.OscConnectionUDP
-import org.rtbo.flexosc.model.OscMessage
-import org.rtbo.flexosc.model.OscSocketParams
+import rtbo.flexosc.model.OscConnection
+import rtbo.flexosc.model.OscConnectionUDP
+import rtbo.flexosc.model.OscMessage
+import rtbo.flexosc.model.OscSocketParams
 
 class DummySurfaceModel : ViewModel() {
 

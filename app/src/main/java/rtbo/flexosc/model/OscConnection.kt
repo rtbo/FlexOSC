@@ -1,4 +1,4 @@
-package org.rtbo.flexosc.model
+package rtbo.flexosc.model
 
 import android.util.Log
 import kotlinx.coroutines.Dispatchers

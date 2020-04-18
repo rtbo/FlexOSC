@@ -1,4 +1,4 @@
-package org.rtbo.flexosc.view
+package rtbo.flexosc.view
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -9,10 +9,10 @@ import android.widget.TextView
 import android.widget.ToggleButton
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
-import org.rtbo.flexosc.viewmodel.ButtonModel
-import org.rtbo.flexosc.viewmodel.ControlModel
-import org.rtbo.flexosc.viewmodel.SurfaceModel
-import org.rtbo.flexosc.viewmodel.ToggleButtonModel
+import rtbo.flexosc.viewmodel.ButtonModel
+import rtbo.flexosc.viewmodel.ControlModel
+import rtbo.flexosc.viewmodel.SurfaceModel
+import rtbo.flexosc.viewmodel.ToggleButtonModel
 
 @SuppressLint("ViewConstructor")
 class SurfaceLayout(

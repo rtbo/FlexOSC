@@ -1,4 +1,4 @@
-package org.rtbo.flexosc.view
+package rtbo.flexosc.view
 
 import android.app.Dialog
 import android.os.Bundle
@@ -10,12 +10,12 @@ import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
-import org.rtbo.flexosc.R
-import org.rtbo.flexosc.model.OscSocketParams
-import org.rtbo.flexosc.viewmodel.ButtonModel
-import org.rtbo.flexosc.viewmodel.Position
-import org.rtbo.flexosc.viewmodel.SurfaceModel
-import org.rtbo.flexosc.viewmodel.ToggleButtonModel
+import rtbo.flexosc.R
+import rtbo.flexosc.model.OscSocketParams
+import rtbo.flexosc.viewmodel.ButtonModel
+import rtbo.flexosc.viewmodel.Position
+import rtbo.flexosc.viewmodel.SurfaceModel
+import rtbo.flexosc.viewmodel.ToggleButtonModel
 
 const val PARAMS_DIALOG_TAG = "params_dialog"
 

@@ -1,10 +1,10 @@
-package org.rtbo.flexosc
+package rtbo.flexosc
 
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.rtbo.flexosc.model.OscAtomic
-import org.rtbo.flexosc.model.OscString
+import rtbo.flexosc.model.OscAtomic
+import rtbo.flexosc.model.OscString
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 

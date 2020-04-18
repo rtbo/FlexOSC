@@ -1,4 +1,4 @@
-package org.rtbo.flexosc
+package rtbo.flexosc
 
 import android.app.Dialog
 import android.os.Bundle
@@ -12,9 +12,9 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import kotlinx.android.synthetic.main.activity_dummy_surface.*
-import org.rtbo.flexosc.model.OscConnectionUDP
-import org.rtbo.flexosc.model.OscMessage
-import org.rtbo.flexosc.model.OscSocketParams
+import rtbo.flexosc.model.OscConnectionUDP
+import rtbo.flexosc.model.OscMessage
+import rtbo.flexosc.model.OscSocketParams
 
 const val CONNECTION_DIALOG_TAG = "connection_dialog"
 
