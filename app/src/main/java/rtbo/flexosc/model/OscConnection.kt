@@ -19,6 +19,7 @@ data class OscSocketParams(
 }
 
 sealed class OscConnection(val params: OscSocketParams) {
+    abstract fun close()
     abstract suspend fun sendMessage(msg: OscMessage)
     abstract suspend fun receiveMessage(): OscMessage?
 }
@@ -29,7 +30,8 @@ class OscConnectionUDP(params: OscSocketParams) : OscConnection(params) {
     }
 
     private val rcvSocket: DatagramSocket by lazy {
-        val sock = DatagramSocket(params.rcvPort)
+        val sock = DatagramSocket()
+        sock.reuseAddress = true
         sock.connect(InetAddress.getByName(params.address), params.rcvPort)
         sock.soTimeout = 1000
         sock
@@ -37,6 +39,13 @@ class OscConnectionUDP(params: OscSocketParams) : OscConnection(params) {
 
     private val hostAddress: InetAddress by lazy {
         InetAddress.getByName(params.address)
+    }
+
+    override fun close() {
+        sendSocket.disconnect()
+        sendSocket.close()
+        rcvSocket.disconnect()
+        rcvSocket.close()
     }
 
     override suspend fun sendMessage(msg: OscMessage) {

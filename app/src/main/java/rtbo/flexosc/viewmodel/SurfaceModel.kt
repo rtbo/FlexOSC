@@ -25,6 +25,7 @@ class SurfaceModel : ViewModel() {
     val params: LiveData<OscSocketParams> = mutableParams
     fun setParams(value: OscSocketParams) {
         mutableParams.value = value
+        connection?.close()
         connection = OscConnectionUDP(value)
         if (receiveMessage.hasActiveObservers() && !listening) {
             startListening()
