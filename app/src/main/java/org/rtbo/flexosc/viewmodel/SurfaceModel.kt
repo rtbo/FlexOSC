@@ -1,5 +1,6 @@
 package org.rtbo.flexosc.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -89,10 +90,13 @@ class SurfaceModel : ViewModel() {
     }
 
     private suspend fun listenLoop() {
+        Log.d("FlexOSX", "Entering listening loop on ${params.value.toString()}")
         while (connection != null && listening) {
             connection?.receiveMessage()?.let {
+                Log.d("FlexOSC", "Received message for ${it.address.value}")
                 receiveMessage.postValue(it)
             }
         }
+        Log.d("FlexOSX", "Exiting listening loop")
     }
 }
