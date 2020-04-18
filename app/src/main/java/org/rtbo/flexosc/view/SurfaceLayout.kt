@@ -28,9 +28,7 @@ class SurfaceLayout(
 
     private val wrappers = ArrayList<ViewWrapper>()
 
-
     init {
-
         addView(paramsView)
         paramsView.text = model.params.value.toString()
         model.params.observe(lifecycleOwner, Observer {
