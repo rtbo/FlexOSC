@@ -4,7 +4,9 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import rtbo.flexosc.model.OscAtomic
+import rtbo.flexosc.model.OscMessage
 import rtbo.flexosc.model.OscString
+import rtbo.flexosc.model.toOsc
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -39,6 +41,25 @@ class OscProtocolTest {
                 's',
                 byteArrayOf('/'.toByte(), 'a'.toByte(), 'b'.toByte(), 'a'.toByte(), 0, 0, 0, 0)
             )
+        )
+    }
+
+    @Test
+    fun printMessageToString() {
+        assertEquals(
+            "OscMessage(/some/address)", OscMessage("/some/address").toString()
+        )
+        assertEquals(
+            "OscMessage(/some/address i:42 f:53.4 s:\"a string argument\" b:[7 bytes])",
+            OscMessage(
+                "/some/address",
+                arrayOf<OscAtomic>(
+                    42.toOsc(),
+                    53.4f.toOsc(),
+                    "a string argument".toOsc(),
+                    byteArrayOf(1, 2, 3, 4, 5, 6, 7).toOsc()
+                )
+            ).toString()
         )
     }
 

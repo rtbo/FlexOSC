@@ -25,12 +25,20 @@ data class OscInt(val value: Int) : OscAtomic() {
     override fun encode(buffer: ByteBuffer) {
         buffer.putInt(value)
     }
+
+    override fun toString(): String {
+        return "i:$value"
+    }
 }
 
 data class OscFloat(val value: Float) : OscAtomic() {
     override val tagLen = Pair('f', 4)
     override fun encode(buffer: ByteBuffer) {
         buffer.putFloat(value)
+    }
+
+    override fun toString(): String {
+        return "f:$value"
     }
 }
 
@@ -47,12 +55,17 @@ data class OscString(val value: String) : OscAtomic() {
         's',
         alignUp(value.length + 1)
     )
+
     override fun encode(buffer: ByteBuffer) {
         var numNulls = alignUp(value.length + 1) - value.length
         buffer.put(value.toByteArray(Charsets.US_ASCII))
         while ((numNulls--) > 0) {
             buffer.put(0.toByte())
         }
+    }
+
+    override fun toString(): String {
+        return "s:\"$value\""
     }
 
     companion object {
@@ -114,6 +127,10 @@ data class OscBlob(val value: ByteArray) : OscAtomic() {
         }
     }
 
+    override fun toString(): String {
+        return "b:[${value.size} bytes]"
+    }
+
     companion object {
         fun decode(buffer: ByteBuffer): OscBlob {
             val len = buffer.int
@@ -166,6 +183,11 @@ data class OscMessage(val address: OscString, val args: Array<OscAtomic> = empty
         var result = address.hashCode()
         result = 31 * result + args.contentHashCode()
         return result
+    }
+
+    override fun toString(): String {
+        val argStr = args.joinToString(" ") { it.toString() }
+        return "OscMessage(${address.value}${ if (argStr.isNotEmpty()) " " else "" }$argStr)"
     }
 }
 
