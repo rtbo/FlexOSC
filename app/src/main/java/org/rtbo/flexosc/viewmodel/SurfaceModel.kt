@@ -10,7 +10,13 @@ import org.rtbo.flexosc.model.OscConnectionUDP
 import org.rtbo.flexosc.model.OscMessage
 import org.rtbo.flexosc.model.OscSocketParams
 
+// dimension units are in grid units
+data class Position(val x: Int, val y: Int)
+data class Size(val width: Int, val height: Int)
+
 class SurfaceModel : ViewModel() {
+
+    var gridSize = 64
 
     private var connection: OscConnection? = null
     private val mutableParams = MutableLiveData<OscSocketParams>(null)
@@ -24,20 +30,30 @@ class SurfaceModel : ViewModel() {
         }
     }
 
-/*
-    private val controllist = arraylist<controlmodel>()
-    private val mutablecontrols = mutablelivedata<list<controlmodel>>(controllist)
+    private val controlList = ArrayList<ControlModel>()
+    private val mutableControls = MutableLiveData<List<ControlModel>>(controlList)
+    private val mutableControlAddEvent = MutableLiveData<ControlModel>()
+    private val mutableControlRemEvent = MutableLiveData<ControlModel>()
 
-    val controls: livedata<list<controlmodel>> = mutablecontrols
-    fun addcontrol(control: controlmodel) {
-        controllist.add(control)
-        mutablecontrols.value = controllist
+    val controls: LiveData<List<ControlModel>> = mutableControls
+    val controlAddEvent: LiveData<ControlModel> = mutableControlAddEvent
+    val controlRemEvent: LiveData<ControlModel> = mutableControlRemEvent
+
+    fun setControls(controls: List<ControlModel>) {
+        controlList.clear()
+        controlList.addAll(controls)
+        mutableControls.value = controlList
     }
-    fun remcontrol(control: controlmodel) {
-        controllist.remove(control)
-        mutablecontrols.value = controllist
+
+    fun addControl(control: ControlModel) {
+        controlList.add(control)
+        mutableControlAddEvent.value = control
     }
-*/
+
+    fun remControl(control: ControlModel) {
+        controlList.remove(control)
+        mutableControlRemEvent.value = control
+    }
 
     fun sendMessage(msg: OscMessage) {
         viewModelScope.launch {

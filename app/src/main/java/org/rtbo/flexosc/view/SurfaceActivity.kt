@@ -12,19 +12,56 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import org.rtbo.flexosc.R
 import org.rtbo.flexosc.model.OscSocketParams
+import org.rtbo.flexosc.viewmodel.ButtonModel
+import org.rtbo.flexosc.viewmodel.Position
 import org.rtbo.flexosc.viewmodel.SurfaceModel
+import org.rtbo.flexosc.viewmodel.ToggleButtonModel
+
+const val PARAMS_DIALOG_TAG = "params_dialog"
 
 class SurfaceActivity : AppCompatActivity() {
     private val model: SurfaceModel by lazy {
         ViewModelProvider(this).get(SurfaceModel::class.java)
     }
-    private val connectionDlg: ConnectionParamsDialog by lazy {
+    private val paramsDlg: ConnectionParamsDialog by lazy {
         val fragment = ConnectionParamsDialog(model)
         fragment.setStyle(
             DialogFragment.STYLE_NORMAL,
             R.style.TitleDialog
         )
         fragment
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        if (model.controls.value!!.isEmpty()) {
+            val play = ButtonModel(model)
+            play.sendAddress = "/transport_play"
+            val stop = ButtonModel(model)
+            stop.sendAddress = "/transport_stop"
+            stop.position = Position(1, 0)
+            val rec = ToggleButtonModel(model)
+            rec.sendAddress = "/rec_enable_toggle"
+            rec.rcvAddress = "/rec_enable_toggle"
+            rec.position = Position(2, 0)
+
+            model.addControl(play)
+            model.addControl(stop)
+            model.addControl(rec)
+        }
+
+        val layout = SurfaceLayout(baseContext, this, model)
+        layout.onParamsChangeRequestListener = {
+            val ft = supportFragmentManager.beginTransaction()
+            val prev = supportFragmentManager.findFragmentByTag(PARAMS_DIALOG_TAG)
+            if (prev != null) {
+                ft.remove(prev)
+            }
+            ft.addToBackStack(null)
+            paramsDlg.show(ft, PARAMS_DIALOG_TAG)
+        }
+        setContentView(layout)
     }
 }
 

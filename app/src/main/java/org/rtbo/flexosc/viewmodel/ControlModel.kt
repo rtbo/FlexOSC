@@ -5,14 +5,20 @@ import androidx.lifecycle.MediatorLiveData
 import org.rtbo.flexosc.model.OscInt
 import org.rtbo.flexosc.model.OscMessage
 
-// dimension units are in grid units
-data class Position(val x: Int, val y: Int)
-data class Size(val width: Int, val height: Int)
-
 sealed class ControlModel(val model: SurfaceModel) {
     var position = Position(0, 0)
     abstract val size: Size
+
+    val left: Int
+        get() = position.x
+    val top: Int
+        get() = position.y
+    val right: Int
+        get() = position.x + size.width
+    val bottom: Int
+        get() = position.y + size.height
 }
+
 
 abstract class ReceivingModel(model: SurfaceModel) : ControlModel(model) {
     var rcvAddress: String
@@ -43,6 +49,7 @@ class ToggleButtonModel(model: SurfaceModel) : ReceivingModel(model) {
     val state: LiveData<Boolean> = this._state
 
     fun setState(value: Boolean) {
+        if (state.value != null && state.value == value) return
         model.sendMessage(
             OscMessage(
                 sendAddress,
