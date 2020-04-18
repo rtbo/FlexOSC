@@ -6,6 +6,7 @@ import kotlinx.coroutines.withContext
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import java.net.SocketTimeoutException
 
 data class OscSocketParams(
     val address: String,
@@ -19,7 +20,7 @@ data class OscSocketParams(
 
 sealed class OscConnection(val params: OscSocketParams) {
     abstract suspend fun sendMessage(msg: OscMessage)
-    abstract suspend fun receiveMessage(): OscMessage
+    abstract suspend fun receiveMessage(): OscMessage?
 }
 
 class OscConnectionUDP(params: OscSocketParams) : OscConnection(params) {
@@ -30,6 +31,7 @@ class OscConnectionUDP(params: OscSocketParams) : OscConnection(params) {
     private val rcvSocket: DatagramSocket by lazy {
         val sock = DatagramSocket(params.rcvPort)
         sock.connect(InetAddress.getByName(params.address), params.rcvPort)
+        sock.soTimeout = 1000
         sock
     }
 
@@ -51,11 +53,15 @@ class OscConnectionUDP(params: OscSocketParams) : OscConnection(params) {
 
     private val rcvBuf = ByteArray(MAX_MSG_SIZE)
 
-    override suspend fun receiveMessage(): OscMessage {
+    override suspend fun receiveMessage(): OscMessage? {
         return withContext(Dispatchers.IO) {
             val pkt = DatagramPacket(rcvBuf, rcvBuf.size)
-            rcvSocket.receive(pkt)
-            oscPacketToMessage(rcvBuf.copyOf(pkt.length))
+            try {
+                rcvSocket.receive(pkt)
+                oscPacketToMessage(rcvBuf.copyOf(pkt.length))
+            } catch (ex: SocketTimeoutException) {
+                null
+            }
         }
     }
 }
