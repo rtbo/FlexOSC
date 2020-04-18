@@ -6,10 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
-import rtbo.flexosc.model.OscConnection
-import rtbo.flexosc.model.OscConnectionUDP
-import rtbo.flexosc.model.OscMessage
-import rtbo.flexosc.model.OscSocketParams
+import rtbo.flexosc.model.*
 
 // dimension units are in grid units
 data class Position(val x: Int, val y: Int)
@@ -24,9 +21,9 @@ class SurfaceModel : ViewModel() {
 
     val params: LiveData<OscSocketParams> = mutableParams
     fun setParams(value: OscSocketParams) {
-        mutableParams.value = value
         connection?.close()
         connection = OscConnectionUDP(value)
+        mutableParams.value = value
         if (receiveMessage.hasActiveObservers() && !listening) {
             startListening()
         }
