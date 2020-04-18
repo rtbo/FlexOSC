@@ -30,9 +30,8 @@ class OscConnectionUDP(params: OscSocketParams) : OscConnection(params) {
     }
 
     private val rcvSocket: DatagramSocket by lazy {
-        val sock = DatagramSocket()
+        val sock = DatagramSocket(params.rcvPort)
         sock.reuseAddress = true
-        sock.connect(InetAddress.getByName(params.address), params.rcvPort)
         sock.soTimeout = 1000
         sock
     }
