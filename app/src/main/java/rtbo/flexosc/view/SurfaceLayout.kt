@@ -27,6 +27,8 @@ class SurfaceLayout(
     private data class ViewWrapper(val control: ControlModel, val view: View)
 
     private val wrappers = ArrayList<ViewWrapper>()
+    private var gridWidth: Int = 0
+    private var gridHeight: Int = 0
 
     init {
         addView(paramsView)
@@ -50,25 +52,45 @@ class SurfaceLayout(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val gs = model.gridSize
+        val width = MeasureSpec.getSize(widthMeasureSpec)
         paramsView.measure(
             MeasureSpec.makeMeasureSpec(
-                MeasureSpec.getSize(widthMeasureSpec),
+                width,
                 MeasureSpec.AT_MOST
             ),
             MeasureSpec.makeMeasureSpec(
-                gs, MeasureSpec.AT_MOST
+                0, MeasureSpec.UNSPECIFIED
             )
         )
+        val height = MeasureSpec.getSize(heightMeasureSpec) - paramsView.measuredHeight
+        val largest = width.coerceAtLeast(height)
+        val smallest = width.coerceAtMost(height)
+        val minGs = 32 * resources.displayMetrics.density
+        gridWidth = (if (width == largest) largest / 20 else smallest / 10).coerceAtLeast(minGs.toInt())
+        gridHeight = (if (height == largest) largest / 20 else smallest / 10).coerceAtLeast(minGs.toInt())
+
         var lef = 0
         var rig = 0
-        var top = paramsView.measuredHeight
-        var bot = 0
+        var top = 0
+        var bot = paramsView.measuredHeight
         for (w in wrappers) {
-            lef = lef.coerceAtMost(w.control.left * gs)
-            rig = rig.coerceAtLeast(w.control.right * gs)
-            top = top.coerceAtMost(paramsView.measuredHeight + w.control.top * gs)
-            bot = bot.coerceAtLeast(top + w.control.bottom * gs)
+            w.view.measure(
+                MeasureSpec.makeMeasureSpec(
+                    (gridWidth * w.control.size.width), MeasureSpec.EXACTLY
+                ),
+                MeasureSpec.makeMeasureSpec(
+                    (gridHeight * w.control.size.height), MeasureSpec.EXACTLY
+                )
+            )
+            val l = w.control.left * gridWidth
+            val r = l + w.view.measuredWidth
+            val t = paramsView.measuredHeight + w.control.top * gridHeight
+            val b = t + w.view.measuredHeight
+
+            lef = lef.coerceAtMost(l)
+            rig = rig.coerceAtLeast(r)
+            top = top.coerceAtMost(t)
+            bot = bot.coerceAtLeast(b)
         }
         setMeasuredDimension(
             (rig - lef + paddingLeft + paddingRight).coerceAtLeast(
@@ -81,16 +103,15 @@ class SurfaceLayout(
     }
 
     override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
-        val gs = model.gridSize
         val paramsLef = l + (measuredWidth - paramsView.measuredWidth) / 2
         val paramsRig = paramsLef + paramsView.measuredWidth
         val paramsBot = t + paddingTop + paramsView.measuredHeight
         paramsView.layout(paramsLef, t + paddingTop, paramsRig, paramsBot)
         for (w in wrappers) {
-            val lef = l + w.control.left * gs
-            val top = paramsBot + w.control.top * gs
-            val rig = l + w.control.right * gs
-            val bot = paramsBot + w.control.bottom * gs
+            val lef = l + w.control.left * gridWidth
+            val top = paramsBot + w.control.top * gridWidth
+            val rig = lef + w.view.measuredWidth
+            val bot = top + w.view.measuredHeight
             w.view.layout(
                 lef, top, rig, bot
             )

@@ -13,9 +13,6 @@ data class Position(val x: Int, val y: Int)
 data class Size(val width: Int, val height: Int)
 
 class SurfaceModel : ViewModel() {
-
-    var gridSize = 64
-
     private var connection: OscConnection? = null
     private val mutableParams = MutableLiveData<OscSocketParams>(null)
 
