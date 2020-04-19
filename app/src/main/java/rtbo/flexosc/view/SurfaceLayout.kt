@@ -137,6 +137,12 @@ class SurfaceLayout(
             STOP_ICON -> R.drawable.ic_stop_black_36dp
             REC_ICON -> R.drawable.ic_record_black_36dp
             STOP_TRASH_ICON -> R.drawable.ic_stop_trash_black_36dp
+            ADD_ICON -> R.drawable.ic_add_black_36dp
+            REM_ICON -> R.drawable.ic_remove_black_36dp
+            START_ICON -> R.drawable.ic_start_black_36dp
+            END_ICON -> R.drawable.ic_end_black_36dp
+            PREV_ICON -> R.drawable.ic_prev_black_36dp
+            NEXT_ICON -> R.drawable.ic_next_black_36dp
             else -> R.drawable.ic_not_found_black_36dp
         }
     }

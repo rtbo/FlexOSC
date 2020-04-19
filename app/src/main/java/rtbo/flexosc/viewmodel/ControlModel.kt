@@ -9,6 +9,12 @@ const val PLAY_ICON = 0
 const val STOP_ICON = 1
 const val REC_ICON = 2
 const val STOP_TRASH_ICON = 3
+const val ADD_ICON = 4
+const val REM_ICON = 5
+const val START_ICON = 6
+const val END_ICON = 7
+const val PREV_ICON = 8
+const val NEXT_ICON = 9
 
 sealed class ControlModel(val model: SurfaceModel) {
     var position = Position(0, 0)

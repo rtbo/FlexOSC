@@ -56,10 +56,46 @@ class SurfaceActivity : AppCompatActivity() {
             stopTrash.icon = STOP_TRASH_ICON
             stopTrash.position = Position(3, 0)
 
+            val addMark = ButtonModel(model)
+            addMark.sendAddress = "/add_marker"
+            addMark.icon = ADD_ICON
+            addMark.position = Position(4, 0)
+
+            val remMark = ButtonModel(model)
+            remMark.sendAddress = "/remove_marker"
+            remMark.icon = REM_ICON
+            remMark.position = Position(5, 0)
+
+            val startMark = ButtonModel(model)
+            startMark.sendAddress = "/goto_start"
+            startMark.icon = START_ICON
+            startMark.position = Position(0, 1)
+
+            val prevMark = ButtonModel(model)
+            prevMark.sendAddress = "/prev_marker"
+            prevMark.icon = PREV_ICON
+            prevMark.position = Position(1, 1)
+
+            val nextMark = ButtonModel(model)
+            nextMark.sendAddress = "/next_marker"
+            nextMark.icon = NEXT_ICON
+            nextMark.position = Position(2, 1)
+
+            val endMark = ButtonModel(model)
+            endMark.sendAddress = "/goto_end"
+            endMark.icon = END_ICON
+            endMark.position = Position(3, 1)
+
             model.addControl(play)
             model.addControl(stop)
             model.addControl(rec)
             model.addControl(stopTrash)
+            model.addControl(addMark)
+            model.addControl(remMark)
+            model.addControl(startMark)
+            model.addControl(endMark)
+            model.addControl(prevMark)
+            model.addControl(nextMark)
         }
 
         val layout = SurfaceLayout(baseContext, this, model)
