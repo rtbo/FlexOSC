@@ -5,6 +5,11 @@ import androidx.lifecycle.MediatorLiveData
 import rtbo.flexosc.model.OscInt
 import rtbo.flexosc.model.OscMessage
 
+const val PLAY_ICON = 0
+const val STOP_ICON = 1
+const val REC_ICON = 2
+const val STOP_TRASH_ICON = 3
+
 sealed class ControlModel(val model: SurfaceModel) {
     var position = Position(0, 0)
     abstract val size: Size
@@ -35,13 +40,31 @@ abstract class ReceivingModel(model: SurfaceModel) : ControlModel(model) {
 }
 
 class ButtonModel(model: SurfaceModel) : ControlModel(model) {
-    var sendAddress: String = ""
     override val size = Size(1, 1)
+    var icon: Int? = null
+
+    var sendAddress: String = ""
 
     fun click() = model.sendMessage(OscMessage(sendAddress))
 }
 
+class LedButtonModel(model: SurfaceModel) : ReceivingModel(model) {
+    override val size = Size(1, 1)
+    var ledIcon: Int = PLAY_ICON
+    var ledColor: Int = 0xff00ff00.toInt()
+
+    var sendAddress: String = ""
+
+    fun click() = model.sendMessage(OscMessage(sendAddress))
+
+    private var _ledState = MsgMapLiveData<Boolean>(receiveMessage, mapSingleBool(true))
+    val ledState: LiveData<Boolean> = this._ledState
+}
+
 class ToggleButtonModel(model: SurfaceModel) : ReceivingModel(model) {
+    override val size = Size(1, 1)
+    var icon: Int? = null
+
     var sendAddress: String = ""
 
     private var _state = MsgMapLiveData<Boolean>(receiveMessage, mapSingleBool(true))
@@ -58,8 +81,6 @@ class ToggleButtonModel(model: SurfaceModel) : ReceivingModel(model) {
         )
         _state.value = value
     }
-
-    override val size = Size(1, 1)
 }
 
 private fun mapSingleBool(default: Boolean): (OscMessage) -> Boolean {

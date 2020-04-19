@@ -2,17 +2,22 @@ package rtbo.flexosc.view
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.drawable.Drawable
+import android.util.Log
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.ToggleButton
+import androidx.appcompat.content.res.AppCompatResources
+import androidx.appcompat.widget.AppCompatButton
+import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
-import rtbo.flexosc.viewmodel.ButtonModel
-import rtbo.flexosc.viewmodel.ControlModel
-import rtbo.flexosc.viewmodel.SurfaceModel
-import rtbo.flexosc.viewmodel.ToggleButtonModel
+import rtbo.flexosc.R
+import rtbo.flexosc.viewmodel.*
 
 @SuppressLint("ViewConstructor")
 class SurfaceLayout(
@@ -30,6 +35,13 @@ class SurfaceLayout(
     private var gridWidth: Int = 0
     private var gridHeight: Int = 0
 
+    private fun darker(color: Int): Int {
+        val hsl = floatArrayOf(0f, 0f, 0f)
+        ColorUtils.colorToHSL(color, hsl)
+        hsl[2] /= 3f
+        return ColorUtils.HSLToColor(hsl)
+    }
+
     init {
         addView(paramsView)
         paramsView.text = model.params.value.toString()
@@ -43,6 +55,7 @@ class SurfaceLayout(
         for (control in model.controls.value!!) {
             val view = when (control) {
                 is ButtonModel -> createButton(control)
+                is LedButtonModel -> createLedButton(control)
                 is ToggleButtonModel -> createToggleButton(control)
                 else -> throw Exception("unsupported control")
             }
@@ -118,16 +131,55 @@ class SurfaceLayout(
         }
     }
 
-    private fun createButton(control: ButtonModel): Button {
-        val view = Button(context)
+    private fun mapIconToRes(icon: Int): Int {
+        return when (icon) {
+            PLAY_ICON -> R.drawable.ic_play_black_36dp
+            STOP_ICON -> R.drawable.ic_stop_black_36dp
+            REC_ICON -> R.drawable.ic_record_black_36dp
+            STOP_TRASH_ICON -> R.drawable.ic_stop_trash_black_36dp
+            else -> R.drawable.ic_not_found_black_36dp
+        }
+    }
+
+    private fun iconIdToDrawable(iconId: Int): Drawable {
+        val resId = mapIconToRes(iconId)
+        val icon = AppCompatResources.getDrawable(context, resId)!!
+        return DrawableCompat.wrap(icon)
+    }
+
+    private fun createButton(control: ButtonModel): View {
+        val view = SurfaceIconButton(context)
         view.setOnClickListener {
             control.click()
         }
-        view.text = "B"
+        control.icon?.let { iconIdToDrawable(it) }?.let {
+            view.icon = it
+            // view.setCompoundDrawablesWithIntrinsicBounds(it, null, null, null)
+        }
         return view
     }
 
-    private fun createToggleButton(control: ToggleButtonModel): ToggleButton {
+    private fun createLedButton(control: LedButtonModel): View {
+        val view = SurfaceIconButton(context)
+        view.setOnClickListener {
+            control.click()
+        }
+        val light = control.ledColor
+        val dark = darker(light)
+
+        val icon = iconIdToDrawable(control.ledIcon)
+        DrawableCompat.setTint(icon, dark)
+        // view.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null)
+        view.icon = icon
+        //view.setPadding(icon.intrinsicWidth, 0, 0, 0)
+        control.ledState.observe(lifecycleOwner, Observer {
+            DrawableCompat.setTint(icon, if (it) light else dark)
+            view.invalidate()
+        })
+        return view
+    }
+
+    private fun createToggleButton(control: ToggleButtonModel): View {
         val view = ToggleButton(context)
         view.setOnCheckedChangeListener { _, checked ->
             control.setState(checked)
@@ -135,7 +187,9 @@ class SurfaceLayout(
         control.state.observe(lifecycleOwner, Observer {
             view.isChecked = it
         })
-        view.text = "T"
+        control.icon?.let { iconIdToDrawable(it) }?.let {
+            view.setCompoundDrawablesWithIntrinsicBounds(it, null, null, null)
+        }
         return view
     }
 
