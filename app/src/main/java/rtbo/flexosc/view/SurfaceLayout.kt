@@ -3,15 +3,11 @@ package rtbo.flexosc.view
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.util.Log
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.ToggleButton
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.appcompat.widget.AppCompatButton
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
 import androidx.lifecycle.LifecycleOwner
@@ -122,7 +118,7 @@ class SurfaceLayout(
         paramsView.layout(paramsLef, t + paddingTop, paramsRig, paramsBot)
         for (w in wrappers) {
             val lef = l + w.control.left * gridWidth
-            val top = paramsBot + w.control.top * gridWidth
+            val top = paramsBot + w.control.top * gridHeight
             val rig = lef + w.view.measuredWidth
             val bot = top + w.view.measuredHeight
             w.view.layout(
