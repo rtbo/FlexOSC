@@ -12,16 +12,18 @@ import androidx.fragment.app.DialogFragment
 import androidx.lifecycle.ViewModelProvider
 import rtbo.flexosc.R
 import rtbo.flexosc.model.OscSocketParams
-import rtbo.flexosc.viewmodel.*
+import rtbo.flexosc.viewmodel.ControlSurface
+import rtbo.flexosc.viewmodel.populateDummySurface
 
 const val PARAMS_DIALOG_TAG = "params_dialog"
 
 class SurfaceActivity : AppCompatActivity() {
-    private val model: SurfaceModel by lazy {
-        ViewModelProvider(this).get(SurfaceModel::class.java)
+
+    private val surface: ControlSurface by lazy {
+        ViewModelProvider(this).get(ControlSurface::class.java)
     }
     private val paramsDlg: ConnectionParamsDialog by lazy {
-        val fragment = ConnectionParamsDialog(model)
+        val fragment = ConnectionParamsDialog(surface)
         fragment.setStyle(
             DialogFragment.STYLE_NORMAL,
             R.style.TitleDialog
@@ -32,11 +34,11 @@ class SurfaceActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (model.controls.value!!.isEmpty()) {
-            populateDummyModel(model)
+        if (surface.controls.isEmpty()) {
+            populateDummySurface(surface)
         }
 
-        val layout = SurfaceLayout(baseContext, this, model)
+        val layout = SurfaceLayout(baseContext, this, surface)
         layout.onParamsChangeRequestListener = {
             val ft = supportFragmentManager.beginTransaction()
             val prev = supportFragmentManager.findFragmentByTag(PARAMS_DIALOG_TAG)
@@ -50,7 +52,7 @@ class SurfaceActivity : AppCompatActivity() {
     }
 }
 
-class ConnectionParamsDialog(private val model: SurfaceModel) : DialogFragment() {
+class ConnectionParamsDialog(private val surface: ControlSurface) : DialogFragment() {
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val dlg = super.onCreateDialog(savedInstanceState)
@@ -70,7 +72,7 @@ class ConnectionParamsDialog(private val model: SurfaceModel) : DialogFragment()
         val rcvPort = v.findViewById<EditText>(R.id.rcvPort)
         val doneBtn = v.findViewById<Button>(R.id.doneBtn)
 
-        val params = model.params.value
+        val params = surface.socketParams.value
         if (params != null) {
             hostAddress.setText(params.address)
             sendPort.setText(params.sendPort.toString())
@@ -78,7 +80,7 @@ class ConnectionParamsDialog(private val model: SurfaceModel) : DialogFragment()
         }
 
         doneBtn.setOnClickListener {
-            model.setParams(
+            surface.setSocketParams(
                 OscSocketParams(
                     hostAddress.text.toString(),
                     sendPort.text.toString().toInt(),

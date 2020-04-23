@@ -1,68 +1,93 @@
 package rtbo.flexosc.viewmodel
 
-fun populateDummyModel(model: SurfaceModel) {
+import rtbo.flexosc.viewmodel.*
 
-    val play = LedButtonModel(model)
-    play.sendAddress = "/transport_play"
-    play.rcvAddress = "/transport_play"
-    play.ledIcon = PLAY_ICON
-    play.ledColor = 0xff00ff00.toInt()
+fun populateDummySurface(surface: ControlSurface) {
+    val play = LedButtonControl(
+        BoolReceivingCompoundCom(surface),
+        Rect(0, 0, 1, 1)
+    )
+    play.com.address = "/transport_play"
+    play.icon = Icon(
+        IconId.PLAY,
+        0xff00ff00.toInt()
+    )
 
-    val stop = ButtonModel(model)
-    stop.sendAddress = "/transport_stop"
-    stop.position = Position(1, 0)
-    stop.icon = STOP_ICON
+    val stop = ButtonControl(
+        SendingCom(surface),
+        Rect(1, 0, 1, 1)
+    )
+    stop.com.address = "/transport_stop"
+    stop.icon =
+        Icon(IconId.STOP)
 
-    val rec = LedButtonModel(model)
-    rec.sendAddress = "/rec_enable_toggle"
-    rec.rcvAddress = "/rec_enable_toggle"
-    rec.position = Position(2, 0)
-    rec.ledIcon = REC_ICON
-    rec.ledColor = 0xffff0000.toInt()
+    val rec = LedButtonControl(
+        BoolReceivingCompoundCom(surface),
+        Rect(2, 0, 1, 1)
+    )
+    rec.com.address = "/rec_enable_toggle"
+    rec.icon = Icon(
+        IconId.REC,
+        0xffff0000.toInt()
+    )
 
-    val stopTrash = ButtonModel(model)
-    stopTrash.sendAddress = "/stop_forget"
-    stopTrash.icon = STOP_TRASH_ICON
-    stopTrash.position = Position(3, 0)
+    val stopTrash = ButtonControl(
+        SendingCom(surface), Rect(3, 0, 1, 1)
+    )
+    stopTrash.com.address = "/stop_forget"
+    stopTrash.icon =
+        Icon(IconId.STOP_TRASH)
 
-    val addMark = ButtonModel(model)
-    addMark.sendAddress = "/add_marker"
-    addMark.icon = ADD_ICON
-    addMark.position = Position(4, 0)
+    val addMark = ButtonControl(
+        SendingCom(surface), Rect(4, 0, 1, 1)
+    )
+    addMark.com.address = "/add_marker"
+    addMark.icon =
+        Icon(IconId.ADD)
 
-    val remMark = ButtonModel(model)
-    remMark.sendAddress = "/remove_marker"
-    remMark.icon = REM_ICON
-    remMark.position = Position(5, 0)
+    val remMark = ButtonControl(
+        SendingCom(surface), Rect(5, 0, 1, 1)
+    )
+    remMark.com.address = "/remove_marker"
+    remMark.icon =
+        Icon(IconId.REM)
 
-    val startMark = ButtonModel(model)
-    startMark.sendAddress = "/goto_start"
-    startMark.icon = START_ICON
-    startMark.position = Position(0, 1)
+    val startMark = ButtonControl(
+        SendingCom(surface), Rect(0, 1, 1, 1)
+    )
+    startMark.com.address = "/goto_start"
+    startMark.icon =
+        Icon(IconId.START)
 
-    val prevMark = ButtonModel(model)
-    prevMark.sendAddress = "/prev_marker"
-    prevMark.icon = PREV_ICON
-    prevMark.position = Position(1, 1)
+    val prevMark = ButtonControl(
+        SendingCom(surface), Rect(1, 1, 1, 1)
+    )
+    prevMark.com.address = "/prev_marker"
+    prevMark.icon =
+        Icon(IconId.PREV)
 
-    val nextMark = ButtonModel(model)
-    nextMark.sendAddress = "/next_marker"
-    nextMark.icon = NEXT_ICON
-    nextMark.position = Position(2, 1)
+    val nextMark = ButtonControl(
+        SendingCom(surface), Rect(2, 1, 1, 1)
+    )
+    nextMark.com.address = "/next_marker"
+    nextMark.icon =
+        Icon(IconId.NEXT)
 
-    val endMark = ButtonModel(model)
-    endMark.sendAddress = "/goto_end"
-    endMark.icon = END_ICON
-    endMark.position = Position(3, 1)
+    val endMark = ButtonControl(
+        SendingCom(surface), Rect(3, 1, 1, 1)
+    )
+    endMark.com.address = "/goto_end"
+    endMark.icon =
+        Icon(IconId.END)
 
-    model.addControl(play)
-    model.addControl(stop)
-    model.addControl(rec)
-    model.addControl(stopTrash)
-    model.addControl(addMark)
-    model.addControl(remMark)
-    model.addControl(startMark)
-    model.addControl(endMark)
-    model.addControl(prevMark)
-    model.addControl(nextMark)
+    surface.addControl(play)
+    surface.addControl(stop)
+    surface.addControl(rec)
+    surface.addControl(stopTrash)
+    surface.addControl(addMark)
+    surface.addControl(remMark)
+    surface.addControl(startMark)
+    surface.addControl(endMark)
+    surface.addControl(prevMark)
+    surface.addControl(nextMark)
 }

@@ -6,7 +6,6 @@ import android.graphics.drawable.Drawable
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import android.widget.ToggleButton
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
@@ -19,13 +18,13 @@ import rtbo.flexosc.viewmodel.*
 class SurfaceLayout(
     context: Context,
     private val lifecycleOwner: LifecycleOwner,
-    private val model: SurfaceModel
+    private val surface: ControlSurface
 ) : ViewGroup(context) {
 
     private val paramsView: TextView = TextView(context)
     var onParamsChangeRequestListener: (() -> Unit)? = null
 
-    private data class ViewWrapper(val control: ControlModel, val view: View)
+    private data class ViewWrapper(val control: Control, val view: View)
 
     private val wrappers = ArrayList<ViewWrapper>()
     private var gridWidth: Int = 0
@@ -40,19 +39,18 @@ class SurfaceLayout(
 
     init {
         addView(paramsView)
-        paramsView.text = model.params.value.toString()
-        model.params.observe(lifecycleOwner, Observer {
+        paramsView.text = surface.socketParams.value.toString()
+        surface.socketParams.observe(lifecycleOwner, Observer {
             paramsView.text = (it?.toString() ?: "(no connection settings)")
         })
         paramsView.setOnClickListener {
             onParamsChangeRequestListener?.invoke()
         }
 
-        for (control in model.controls.value!!) {
+        for (control in surface.controls) {
             val view = when (control) {
-                is ButtonModel -> createButton(control)
-                is LedButtonModel -> createLedButton(control)
-                is ToggleButtonModel -> createToggleButton(control)
+                is ButtonControl -> createButton(control)
+                is LedButtonControl -> createLedButton(control)
                 else -> throw Exception("unsupported control")
             }
             wrappers.add(ViewWrapper(control, view))
@@ -75,25 +73,28 @@ class SurfaceLayout(
         val largest = width.coerceAtLeast(height)
         val smallest = width.coerceAtMost(height)
         val minGs = 32 * resources.displayMetrics.density
-        gridWidth = (if (width == largest) largest / 20 else smallest / 10).coerceAtLeast(minGs.toInt())
-        gridHeight = (if (height == largest) largest / 20 else smallest / 10).coerceAtLeast(minGs.toInt())
+        gridWidth =
+            (if (width == largest) largest / 20 else smallest / 10).coerceAtLeast(minGs.toInt())
+        gridHeight =
+            (if (height == largest) largest / 20 else smallest / 10).coerceAtLeast(minGs.toInt())
 
         var lef = 0
         var rig = 0
         var top = 0
         var bot = paramsView.measuredHeight
         for (w in wrappers) {
+            val rect = w.control.rect
             w.view.measure(
                 MeasureSpec.makeMeasureSpec(
-                    (gridWidth * w.control.size.width), MeasureSpec.EXACTLY
+                    (gridWidth * rect.width), MeasureSpec.EXACTLY
                 ),
                 MeasureSpec.makeMeasureSpec(
-                    (gridHeight * w.control.size.height), MeasureSpec.EXACTLY
+                    (gridHeight * rect.height), MeasureSpec.EXACTLY
                 )
             )
-            val l = w.control.left * gridWidth
+            val l = rect.left * gridWidth
             val r = l + w.view.measuredWidth
-            val t = paramsView.measuredHeight + w.control.top * gridHeight
+            val t = paramsView.measuredHeight + rect.top * gridHeight
             val b = t + w.view.measuredHeight
 
             lef = lef.coerceAtMost(l)
@@ -117,8 +118,9 @@ class SurfaceLayout(
         val paramsBot = t + paddingTop + paramsView.measuredHeight
         paramsView.layout(paramsLef, t + paddingTop, paramsRig, paramsBot)
         for (w in wrappers) {
-            val lef = l + w.control.left * gridWidth
-            val top = paramsBot + w.control.top * gridHeight
+            val rect = w.control.rect
+            val lef = l + rect.left * gridWidth
+            val top = paramsBot + rect.top * gridHeight
             val rig = lef + w.view.measuredWidth
             val bot = top + w.view.measuredHeight
             w.view.layout(
@@ -127,73 +129,55 @@ class SurfaceLayout(
         }
     }
 
-    private fun mapIconToRes(icon: Int): Int {
-        return when (icon) {
-            PLAY_ICON -> R.drawable.ic_play_black_36dp
-            STOP_ICON -> R.drawable.ic_stop_black_36dp
-            REC_ICON -> R.drawable.ic_record_black_36dp
-            STOP_TRASH_ICON -> R.drawable.ic_stop_trash_black_36dp
-            ADD_ICON -> R.drawable.ic_add_black_36dp
-            REM_ICON -> R.drawable.ic_remove_black_36dp
-            START_ICON -> R.drawable.ic_start_black_36dp
-            END_ICON -> R.drawable.ic_end_black_36dp
-            PREV_ICON -> R.drawable.ic_prev_black_36dp
-            NEXT_ICON -> R.drawable.ic_next_black_36dp
+    private fun mapIconIdToRes(iconId: IconId): Int {
+        return when (iconId) {
+            IconId.PLAY -> R.drawable.ic_play_black_36dp
+            IconId.STOP -> R.drawable.ic_stop_black_36dp
+            IconId.REC -> R.drawable.ic_record_black_36dp
+            IconId.STOP_TRASH -> R.drawable.ic_stop_trash_black_36dp
+            IconId.ADD -> R.drawable.ic_add_black_36dp
+            IconId.REM -> R.drawable.ic_remove_black_36dp
+            IconId.START -> R.drawable.ic_start_black_36dp
+            IconId.END -> R.drawable.ic_end_black_36dp
+            IconId.PREV -> R.drawable.ic_prev_black_36dp
+            IconId.NEXT -> R.drawable.ic_next_black_36dp
             else -> R.drawable.ic_not_found_black_36dp
         }
     }
 
-    private fun iconIdToDrawable(iconId: Int): Drawable {
-        val resId = mapIconToRes(iconId)
+    private fun iconIdToDrawable(iconId: IconId): Drawable {
+        val resId = mapIconIdToRes(iconId)
         val icon = AppCompatResources.getDrawable(context, resId)!!
         return DrawableCompat.wrap(icon)
     }
 
-    private fun createButton(control: ButtonModel): View {
+    private fun createButton(control: ButtonControl): View {
         val view = SurfaceIconButton(context)
         view.setOnClickListener {
             control.click()
         }
-        control.icon?.let { iconIdToDrawable(it) }?.let {
-            view.icon = it
-            // view.setCompoundDrawablesWithIntrinsicBounds(it, null, null, null)
-        }
+        view.icon = iconIdToDrawable(control.icon.id)
         return view
     }
 
-    private fun createLedButton(control: LedButtonModel): View {
+    private fun createLedButton(control: LedButtonControl): View {
         val view = SurfaceIconButton(context)
         view.setOnClickListener {
             control.click()
         }
-        val light = control.ledColor
+        val light = control.icon.color
         val dark = darker(light)
 
-        val icon = iconIdToDrawable(control.ledIcon)
+        val icon = iconIdToDrawable(control.icon.id)
         DrawableCompat.setTint(icon, dark)
-        // view.setCompoundDrawablesWithIntrinsicBounds(icon, null, null, null)
         view.icon = icon
-        //view.setPadding(icon.intrinsicWidth, 0, 0, 0)
-        control.ledState.observe(lifecycleOwner, Observer {
-            DrawableCompat.setTint(icon, if (it) light else dark)
-            view.invalidate()
+        control.com.rcv.value.observe(lifecycleOwner, Observer {
+            it?.let {
+                DrawableCompat.setTint(icon, if (it) light else dark)
+                view.invalidate()
+            }
         })
         return view
     }
-
-    private fun createToggleButton(control: ToggleButtonModel): View {
-        val view = ToggleButton(context)
-        view.setOnCheckedChangeListener { _, checked ->
-            control.setState(checked)
-        }
-        control.state.observe(lifecycleOwner, Observer {
-            view.isChecked = it
-        })
-        control.icon?.let { iconIdToDrawable(it) }?.let {
-            view.setCompoundDrawablesWithIntrinsicBounds(it, null, null, null)
-        }
-        return view
-    }
-
 
 }

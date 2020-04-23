@@ -1,4 +1,4 @@
-package rtbo.flexosc.viewmodel
+package rtbo.flexosc.view
 
 import android.content.Context
 import android.graphics.Canvas

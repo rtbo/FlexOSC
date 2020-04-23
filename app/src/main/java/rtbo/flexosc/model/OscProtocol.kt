@@ -211,8 +211,8 @@ fun oscMessageToPacket(msg: OscMessage): ByteArray {
     return buffer.array()
 }
 
-fun oscPacketToMessage(pkt: ByteArray): OscMessage {
-    val buffer = ByteBuffer.wrap(pkt)
+fun oscPacketToMessage(pkt: ByteArray, offset: Int, length: Int): OscMessage {
+    val buffer = ByteBuffer.wrap(pkt, offset, length)
     buffer.order(ByteOrder.BIG_ENDIAN)
     val address = OscString.decode(buffer)
     val typeTags = OscString.decode(buffer)

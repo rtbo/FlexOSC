@@ -1,6 +1,8 @@
 package rtbo.flexosc.model
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.withContext
 import java.net.DatagramPacket
 import java.net.DatagramSocket
@@ -20,7 +22,7 @@ data class OscSocketParams(
 sealed class OscConnection(val params: OscSocketParams) {
     abstract fun close()
     abstract suspend fun sendMessage(msg: OscMessage)
-    abstract suspend fun receiveMessage(): OscMessage?
+    abstract suspend fun receiveMessages(channel: SendChannel<OscMessage>)
 }
 
 class OscConnectionUDP(params: OscSocketParams) : OscConnection(params) {
@@ -54,19 +56,22 @@ class OscConnectionUDP(params: OscSocketParams) : OscConnection(params) {
         }
     }
 
-    private val rcvBuf = ByteArray(MAX_MSG_SIZE)
-
-    override suspend fun receiveMessage(): OscMessage? {
-        return withContext(Dispatchers.IO) {
-            val pkt = DatagramPacket(rcvBuf, rcvBuf.size)
-            try {
-                rcvSocket.receive(pkt)
-                oscPacketToMessage(rcvBuf.copyOf(pkt.length))
-            } catch (ex: SocketTimeoutException) {
-                null
+    override suspend fun receiveMessages(channel: SendChannel<OscMessage>) {
+        withContext(Dispatchers.IO) {
+            val buf = ByteArray(MAX_MSG_SIZE)
+            while (true) {
+                val pkt = DatagramPacket(buf, buf.size)
+                try {
+                    rcvSocket.receive(pkt)
+                    val msg = oscPacketToMessage(buf, 0, pkt.length)
+                    channel.send(msg)
+                } catch (ex: SocketTimeoutException) {
+                } catch (ex: CancellationException) {
+                    break
+                }
             }
         }
     }
 }
 
-const val MAX_MSG_SIZE = 16 * 1024
+private const val MAX_MSG_SIZE = 4096
