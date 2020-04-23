@@ -2,27 +2,22 @@ package rtbo.flexosc.view
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.appcompat.content.res.AppCompatResources
-import androidx.core.graphics.ColorUtils
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
-import rtbo.flexosc.R
-import rtbo.flexosc.viewmodel.*
+import rtbo.flexosc.viewmodel.Control
+import rtbo.flexosc.viewmodel.ControlSurface
+import rtbo.flexosc.viewmodel.left
+import rtbo.flexosc.viewmodel.top
 
 @SuppressLint("ViewConstructor")
 class SurfaceLayout(
     context: Context,
-    private val lifecycleOwner: LifecycleOwner,
-    private val surface: ControlSurface
+    private val paramsView: TextView,
+    private val controlViewFactory: ControlViewFactory
 ) : ViewGroup(context) {
-
-    private val paramsView: TextView = TextView(context)
-    var onParamsChangeRequestListener: (() -> Unit)? = null
 
     private data class ViewWrapper(val control: Control, val view: View)
 
@@ -30,31 +25,22 @@ class SurfaceLayout(
     private var gridWidth: Int = 0
     private var gridHeight: Int = 0
 
-    private fun darker(color: Int): Int {
-        val hsl = floatArrayOf(0f, 0f, 0f)
-        ColorUtils.colorToHSL(color, hsl)
-        hsl[2] /= 3f
-        return ColorUtils.HSLToColor(hsl)
-    }
-
     init {
         addView(paramsView)
-        paramsView.text = surface.socketParams.value.toString()
-        surface.socketParams.observe(lifecycleOwner, Observer {
-            paramsView.text = (it?.toString() ?: "(no connection settings)")
-        })
-        paramsView.setOnClickListener {
-            onParamsChangeRequestListener?.invoke()
-        }
+    }
 
-        for (control in surface.controls) {
-            val view = when (control) {
-                is ButtonControl -> createButton(control)
-                is LedButtonControl -> createLedButton(control)
-                else -> throw Exception("unsupported control")
-            }
-            wrappers.add(ViewWrapper(control, view))
-            addView(view)
+    fun addControl(control: Control) {
+        val view = controlViewFactory.createControlView(control)
+        wrappers.add(ViewWrapper(control, view))
+        addView(view)
+    }
+
+    fun remControl(control: Control) {
+        val ind = wrappers.indexOfFirst { it.control == control }
+        if (ind != -1) {
+            val view = wrappers[ind].view
+            wrappers.removeAt(ind)
+            removeView(view)
         }
     }
 
@@ -128,56 +114,4 @@ class SurfaceLayout(
             )
         }
     }
-
-    private fun mapIconIdToRes(iconId: IconId): Int {
-        return when (iconId) {
-            IconId.PLAY -> R.drawable.ic_play_black_36dp
-            IconId.STOP -> R.drawable.ic_stop_black_36dp
-            IconId.REC -> R.drawable.ic_record_black_36dp
-            IconId.STOP_TRASH -> R.drawable.ic_stop_trash_black_36dp
-            IconId.ADD -> R.drawable.ic_add_black_36dp
-            IconId.REM -> R.drawable.ic_remove_black_36dp
-            IconId.START -> R.drawable.ic_start_black_36dp
-            IconId.END -> R.drawable.ic_end_black_36dp
-            IconId.PREV -> R.drawable.ic_prev_black_36dp
-            IconId.NEXT -> R.drawable.ic_next_black_36dp
-            else -> R.drawable.ic_not_found_black_36dp
-        }
-    }
-
-    private fun iconIdToDrawable(iconId: IconId): Drawable {
-        val resId = mapIconIdToRes(iconId)
-        val icon = AppCompatResources.getDrawable(context, resId)!!
-        return DrawableCompat.wrap(icon)
-    }
-
-    private fun createButton(control: ButtonControl): View {
-        val view = SurfaceIconButton(context)
-        view.setOnClickListener {
-            control.click()
-        }
-        view.icon = iconIdToDrawable(control.icon.id)
-        return view
-    }
-
-    private fun createLedButton(control: LedButtonControl): View {
-        val view = SurfaceIconButton(context)
-        view.setOnClickListener {
-            control.click()
-        }
-        val light = control.icon.color
-        val dark = darker(light)
-
-        val icon = iconIdToDrawable(control.icon.id)
-        DrawableCompat.setTint(icon, dark)
-        view.icon = icon
-        control.com.rcv.value.observe(lifecycleOwner, Observer {
-            it?.let {
-                DrawableCompat.setTint(icon, if (it) light else dark)
-                view.invalidate()
-            }
-        })
-        return view
-    }
-
 }
