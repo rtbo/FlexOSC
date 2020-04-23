@@ -13,4 +13,10 @@
     <string name="default_host_address">192.168.1.1</string>
     <string name="receiving_port">Receiving port</string>
     <string name="sending_port">Sending port</string>
+    <string name="surface_orientation">Surface orientation</string>
+    <string name="open_menu">Open menu</string>
+    <string-array name="orientations">
+        <item>Landscape</item>
+        <item>Portrait</item>
+    </string-array>
 </resources>

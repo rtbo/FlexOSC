@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/drawerLayout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    tools:ignore="RtlHardcoded"
+    >
+
+    <!-- Main content -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+        <rtbo.flexosc.view.SurfaceEditorLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            />
+
+        <ImageButton
+            android:id="@+id/openMenuBut"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|right"
+            android:layout_margin="10dp"
+            android:background="@drawable/shape_round_button"
+            android:contentDescription="@string/open_menu"
+            android:src="@drawable/ic_add_black_36dp"
+            />
+    </FrameLayout>
+
+    <!-- Side menu -->
+    <LinearLayout
+        android:id="@+id/actionMenu"
+        android:layout_width="300dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="right"
+        android:background="@drawable/shape_left_border"
+        android:orientation="vertical"
+        android:padding="10dp"
+        >
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+            <TableRow tools:ignore="UselessParent">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:labelFor="@id/orientationSpinner"
+                    android:text="@string/surface_orientation"
+                    />
+                <Spinner
+                    android:id="@+id/orientationSpinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:entries="@array/orientations"
+                    />
+            </TableRow>
+
+        </TableLayout>
+
+        <ListView
+            android:id="@+id/controlList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbars="none"
+            tools:ignore="NestedScrolling"
+            />
+    </LinearLayout>
+
+</androidx.drawerlayout.widget.DrawerLayout>

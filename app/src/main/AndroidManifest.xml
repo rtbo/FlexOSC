@@ -16,6 +16,8 @@
         tools:ignore="AllowBackup"
         >
         <activity android:name=".view.SurfaceActivity">
+        </activity>
+        <activity android:name=".view.SurfaceEditorActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
